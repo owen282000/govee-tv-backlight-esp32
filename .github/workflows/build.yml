@@ -1,0 +1,93 @@
+# Builds the firmware on every push. On a v* tag it also publishes a release
+# with the binaries and deploys the browser installer to GitHub Pages.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+      - name: Install PlatformIO and esptool
+        run: pip install platformio "esptool<5"
+      - name: Build and package
+        env:
+          FW_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          mkdir -p dist
+          # one env at a time, merged straight after its build
+          for env in esp32dev gledopto; do
+            pio run -d firmware -e "$env"
+            tools/merge_bin.sh "$env" "dist/govee-tv-backlight-$env-full.bin"
+            cp "firmware/.pio/build/$env/firmware.bin" "dist/govee-tv-backlight-$env-ota.bin"
+          done
+          ls -l dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: firmware
+          path: dist/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: firmware
+          path: dist
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+  pages:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: firmware
+          path: dist
+      - name: Assemble the installer
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          mkdir -p public
+          cp site/index.html public/
+          for env in esp32dev gledopto; do
+            cp "dist/govee-tv-backlight-$env-full.bin" public/
+            python3 tools/make_manifest.py "$env" "$VERSION" > "public/manifest-$env.json"
+          done
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+      - id: deploy
+        uses: actions/deploy-pages@v5

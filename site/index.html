@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Govee TV Backlight ESP32 installer</title>
+  <meta name="description" content="Flash the govee-tv-backlight-esp32 firmware to an ESP32 from your browser and set up Wi-Fi, for the Govee TV Backlight 3 Pro (H66A0, H66A1) LED strip.">
+  <script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --sub: #5b6475; --line: #e3e6ec;
+      --accent: #2f7d5b; --accent-text: #ffffff; --warn: #9a6a00;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #12151b; --card: #1a1e26; --text: #e6e9ef; --sub: #9aa3b2; --line: #2a303b;
+        --accent: #4fb88a; --accent-text: #0d1a14; --warn: #e0b04a;
+        color-scheme: dark;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
+    h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+    .lead { color: var(--sub); margin: 0 0 32px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin: 0 0 16px; }
+    .card h2 { font-size: 18px; margin: 0 0 6px; }
+    .card p { margin: 0 0 14px; color: var(--sub); }
+    ol { margin: 0; padding-left: 20px; color: var(--sub); }
+    li { margin: 4px 0; }
+    code { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--text); overflow-wrap: anywhere; }
+    a { color: var(--accent); }
+    .btn { display: inline-block; background: var(--accent); color: var(--accent-text); border: 0; border-radius: 10px; padding: 11px 18px; font: 600 15px/1 inherit; font-family: inherit; cursor: pointer; text-decoration: none; }
+    .note { color: var(--warn); font-size: 14px; margin: 10px 0 0; }
+    .muted { color: var(--sub); font-size: 14px; }
+    footer { margin-top: 32px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Govee TV Backlight ESP32 installer</h1>
+  <p class="lead">Flash the firmware that drives the Govee TV Backlight 3 Pro LED strip (H66A0, H66A1) to an ESP32, and set up Wi-Fi straight after. Version <span id="ver">VERSION</span>. Source and wiring on <a href="https://github.com/owen282000/govee-tv-backlight-esp32">GitHub</a>.</p>
+
+  <div class="card">
+    <h2>ESP32 dev board, over USB</h2>
+    <p>Any ESP32 board with a USB port. Strip data on GPIO 16.</p>
+    <esp-web-install-button manifest="manifest-esp32dev.json">
+      <button slot="activate" class="btn">Install on an ESP32</button>
+      <span slot="unsupported" class="note">Your browser can't talk to USB devices. Use Chrome or Edge on a computer.</span>
+      <span slot="not-allowed" class="note">The installer needs a secure page (https).</span>
+    </esp-web-install-button>
+  </div>
+
+  <div class="card">
+    <h2>Gledopto GL-C-015WL-M, over USB</h2>
+    <p>The same firmware with the Gledopto's output power switch (GPIO 18). Only if you have it on a USB-serial adapter.</p>
+    <esp-web-install-button manifest="manifest-gledopto.json">
+      <button slot="activate" class="btn">Install on a Gledopto</button>
+      <span slot="unsupported" class="note">Your browser can't talk to USB devices. Use Chrome or Edge on a computer.</span>
+      <span slot="not-allowed" class="note">The installer needs a secure page (https).</span>
+    </esp-web-install-button>
+  </div>
+
+  <div class="card">
+    <h2>Gledopto that still runs WLED, no cable</h2>
+    <ol>
+      <li>Download <code>govee-tv-backlight-gledopto-ota.bin</code> from the <a href="https://github.com/owen282000/govee-tv-backlight-esp32/releases/latest">latest release</a>.</li>
+      <li>In WLED open <b>Config</b>, <b>Security &amp; Updates</b>, <b>Manual OTA update</b> and upload the file.</li>
+      <li>The board restarts with its own Wi-Fi network <code>govee-backlight-xxxx</code>, password <code>backlight</code>. Join it with your phone: the setup page opens by itself, or go to <code>http://192.168.4.1</code>.</li>
+      <li>Pick your Wi-Fi network, enter the password, save. The board restarts and joins it.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>What happens</h2>
+    <ol>
+      <li>Connect the ESP32 with a USB data cable and press the button. Pick its serial port.</li>
+      <li>The installer erases the board and writes the firmware, about a minute. If it says <i>Failed to initialize</i>, hold the board's <b>BOOT</b> button while you click Install, and let go once the progress bar starts.</li>
+      <li>It then asks for your Wi-Fi network and password, and shows the address of the board when it's connected.</li>
+      <li>Open that address: <code>/cmd?q=test</code> runs a color test on the strip. The README has all commands and the Hyperion setup.</li>
+    </ol>
+    <p class="muted" style="margin-top:12px">The installer runs in your browser with <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a>. Your Wi-Fi password goes from your browser to the ESP32 over USB and nowhere else.</p>
+  </div>
+
+  <footer class="muted">Not affiliated with or endorsed by Govee. MIT licensed. Made by <a href="https://github.com/owen282000">Owen Vogelaar</a>.</footer>
+</main>
+<script>
+  fetch("manifest-esp32dev.json").then(r => r.json()).then(m => { document.getElementById("ver").textContent = m.version; }).catch(() => {});
+</script>
+</body>
+</html>

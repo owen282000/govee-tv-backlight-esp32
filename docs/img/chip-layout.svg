@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>One chip: 90 bits, five channels of 2 current bits and a 16-bit value</title>
+  <style>
+    .lbl { fill: #8b949e; font-size: 13px; }
+    .ttl { fill: #8b949e; font-size: 14px; font-weight: 600; }
+    .in  { fill: #ffffff; font-size: 13px; font-weight: 600; }
+    .cur { fill: #ffffff; font-size: 11px; }
+    .wave { fill: none; stroke: #8b949e; stroke-width: 2; }
+  </style>
+  <text class="ttl" x="10" y="22">One chip = 90 bits, MSB first. 90 chips per frame, no header.</text>
+  <!-- 5 channels, each 170 px: 20 px current bits + 150 px value -->
+  <g transform="translate(10,40)">
+    <rect x="0" y="0" width="20" height="44" fill="#2f6f3e"/><rect x="20" y="0" width="150" height="44" fill="#3fa05a"/>
+    <text class="cur" x="10" y="27" text-anchor="middle">11</text><text class="in" x="95" y="27" text-anchor="middle">Green 16 bit</text>
+    <rect x="175" y="0" width="20" height="44" fill="#8a2f3a"/><rect x="195" y="0" width="150" height="44" fill="#d0465a"/>
+    <text class="cur" x="185" y="27" text-anchor="middle">11</text><text class="in" x="270" y="27" text-anchor="middle">Red 16 bit</text>
+    <rect x="350" y="0" width="20" height="44" fill="#2a4f8f"/><rect x="370" y="0" width="150" height="44" fill="#3d73d6"/>
+    <text class="cur" x="360" y="27" text-anchor="middle">11</text><text class="in" x="445" y="27" text-anchor="middle">Blue 16 bit</text>
+    <rect x="525" y="0" width="20" height="44" fill="#4a6273"/><rect x="545" y="0" width="150" height="44" fill="#6f8ea3"/>
+    <text class="cur" x="535" y="27" text-anchor="middle">11</text><text class="in" x="620" y="27" text-anchor="middle">Cold white 16 bit</text>
+    <rect x="700" y="0" width="20" height="44" fill="#8a5a1f"/><rect x="720" y="0" width="150" height="44" fill="#d08a32"/>
+    <text class="cur" x="710" y="27" text-anchor="middle">11</text><text class="in" x="795" y="27" text-anchor="middle">Warm white 16 bit</text>
+    <text class="lbl" x="0" y="64">2 bits: drive current (11 = brightest, what Govee sends)</text>
+    <text class="lbl" x="0" y="82">16 bits: PWM value 0-65535, linear</text>
+  </g>
+  <!-- bit timing -->
+  <g transform="translate(10,150)">
+    <text class="ttl" x="0" y="0">Bits at 800 kHz (1.25 us each), 3.3 V logic</text>
+    <text class="lbl" x="0" y="34">0</text>
+    <path class="wave" d="M20,50 L20,22 L60,22 L60,50 L180,50"/>
+    <text class="lbl" x="22" y="74">300 ns high, 950 ns low</text>
+    <text class="lbl" x="260" y="34">1</text>
+    <path class="wave" d="M280,50 L280,22 L400,22 L400,50 L440,50"/>
+    <text class="lbl" x="282" y="74">950 ns high, 300 ns low</text>
+    <text class="lbl" x="520" y="34">end of frame</text>
+    <path class="wave" d="M520,50 L700,50"/>
+    <text class="lbl" x="520" y="74">low for more than 80 us</text>
+  </g>
+</svg>
